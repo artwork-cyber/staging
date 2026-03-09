@@ -163,8 +163,9 @@ if (contactForm) {
       src: img ? img.src : ''
     });
 
-    item.addEventListener('click', () => {
-      if (!img || !artworks[index].src) return;
+  item.addEventListener('click', (event) => {      if (!img || !artworks[index].src) re
+            // Prevent modal from opening if purchase button was clicked
+    if (event.target.closest('.btn-purchase')) return;turn;
       currentIndex = index;
       openModal();
     });
