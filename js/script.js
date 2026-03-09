@@ -263,4 +263,46 @@ if (contactForm) {
       modalImage.classList.toggle('zoomed');
     });
   }
-}); // end DOMContentLoaded
+})
+  
+    // ========== PURCHASE INQUIRY BUTTONS ==========
+  // Event delegation for scalability - handles hundreds of artworks efficiently
+  const galleryGrid = document.querySelector('.gallery-grid');
+  
+  if (galleryGrid) {
+    galleryGrid.addEventListener('click', (e) => {
+      // Check if clicked element is purchase button or its child
+      const purchaseBtn = e.target.closest('.btn-purchase');
+      
+      if (purchaseBtn) {
+        // CRITICAL: Prevent event bubbling to gallery-item click handler
+        e.stopPropagation();
+        e.preventDefault();
+        
+        // Get artwork name from data attribute
+        const artworkName = purchaseBtn.dataset.artwork || 'Selected Artwork';
+        
+        // Scroll to contact section smoothly
+        const contactSection = document.getElementById('contact');
+        if (contactSection) {
+          contactSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Wait for scroll, then prefill form
+        setTimeout(() => {
+          // Set interest to "Purchasing Available Work"
+          const interestSelect = document.getElementById('interest');
+          if (interestSelect) {
+            interestSelect.value = 'purchase';
+          }
+          
+          // Prefill message with artwork name
+          const messageField = document.getElementById('message');
+          if (messageField) {
+            messageField.value = `I am interested in purchasing "${artworkName}". Please provide information about pricing and availability.`;
+            messageField.focus();
+          }
+        }, 800); // Delay to allow smooth scroll to complete
+      }
+    });
+  }; // end DOMContentLoaded
