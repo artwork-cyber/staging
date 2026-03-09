@@ -38,6 +38,40 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+
+    // ========== PURCHASE INQUIRY BUTTON HANDLING ==========
+  const purchaseButtons = document.querySelectorAll('[data-artwork-inquiry]');
+  
+  purchaseButtons.forEach((button) => {
+    button.addEventListener('click', function() {
+      // Get artwork details from parent gallery item
+      const galleryItem = this.closest('.gallery-item');
+      const title = galleryItem.querySelector('h3')?.textContent || 'this artwork';
+      const medium = galleryItem.querySelector('.gallery-meta span:first-child')?.textContent || '';
+      const size = galleryItem.querySelector('.gallery-meta span:last-child')?.textContent || '';
+      
+      // Scroll to contact form
+      const contactSection = document.getElementById('contact');
+      if (contactSection) {
+        contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      
+      // Prefill form after a short delay (to allow scroll)
+      setTimeout(() => {
+        const interestSelect = document.getElementById('interest');
+        const messageTextarea = document.getElementById('message');
+        
+        if (interestSelect) {
+          interestSelect.value = 'purchase';
+        }
+        
+        if (messageTextarea) {
+          const artworkInfo = medium && size ? `${title} (${medium}, ${size})` : title;
+          messageTextarea.value = `I'm interested in purchasing ${artworkInfo}.`;
+        }
+      }, 600);
+    });
+  });
   // ========== CONTACT FORM HANDLING ==========
 const contactForm = document.getElementById('contactForm');
 const formStatus = document.getElementById('formStatus');
