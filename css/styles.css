@@ -1018,3 +1018,52 @@ nav a.active::after {
 
 /* RESPONSIVE */
 /* keep your existing media queries as-is */
+
+
+/* ========== PURCHASE INQUIRY BUTTONS ========== */
+.btn-purchase {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+  margin-top: 1rem;
+  width: 100%;
+  justify-content: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-purchase:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+  background: linear-gradient(135deg, #ff5252 0%, #e63946 100%);
+}
+
+.btn-purchase:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+}
+
+.btn-purchase .btn-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.btn-purchase .btn-text {
+  line-height: 1;
+}
+
+/* Ensure button doesn't trigger gallery modal */
+.gallery-item .btn-purchase {
+  position: relative;
+  z-index: 10;
+}
