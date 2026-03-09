@@ -165,8 +165,7 @@ if (contactForm) {
 
   item.addEventListener('click', (event) => {      if (!img || !artworks[index].src) re
             // Prevent modal from opening if purchase button was clicked
-    if (event.target.closest('.btn-purchase')) return;turn;
-      currentIndex = index;
+    if (event.target.closest('.btn-purchase')) { event.stopPropagation(); event.preventDefault(); return; }      currentIndex = index;
       openModal();
     });
   });
