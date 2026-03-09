@@ -43,7 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const purchaseButtons = document.querySelectorAll('[data-artwork-inquiry]');
   
   purchaseButtons.forEach((button) => {
-    button.addEventListener('click', function() {
+    button.addEventListener('click', functioe() {
+          e.preventDefault();
+          e.stopPropagation();
       // Get artwork details from parent gallery item
       const galleryItem = this.closest('.gallery-item');
       const title = galleryItem.querySelector('h3')?.textContent || 'this artwork';
