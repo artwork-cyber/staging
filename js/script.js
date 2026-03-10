@@ -3,12 +3,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========== INTERSECTION OBSERVER FOR NAV HIGHLIGHTING ==========
   const sections = document.querySelectorAll('section[id]');
   const navLinks = document.querySelectorAll('.nav-link');
-
   const observerOptions = {
     threshold: 0.3,
     rootMargin: '-60px 0px -66% 0px'
   };
-
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
@@ -18,7 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }, observerOptions);
-
   sections.forEach((section) => observer.observe(section));
 
   // ========== SMOOTH SCROLL BEHAVIOR ==========
@@ -39,69 +36,59 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ========== CONTACT FORM HANDLING ==========
-const contactForm = document.getElementById('contactForm');
-const formStatus = document.getElementById('formStatus');
-
-if (contactForm) {
-  contactForm.addEventListener('submit', function (e) {
-    e.preventDefault();
-
-    // Get form values
-    const formData = {
-      name: document.getElementById('name').value.trim(),
-      email: document.getElementById('email').value.trim(),
-      phone: document.getElementById('phone').value.trim(),
-      interest: document.getElementById('interest').value,
-      message: document.getElementById('message').value.trim()
-    };
-
-    // Validation
-    if (!formData.name || !formData.email || !formData.interest || !formData.message) {
-      showFormStatus('Please fill in all required fields.', 'error');
-      return;
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      showFormStatus('Please enter a valid email address.', 'error');
-      return;
-    }
-
-    // Build mailto link with all fields
-    const mailtoLink =
-      `mailto:info@romanzuzuk.com?subject=Contact from ${encodeURIComponent(formData.name)} - ${encodeURIComponent(formData.interest)}` +
-      `&body=${encodeURIComponent(
-        `Name: ${formData.name}\n` +
-        `Email: ${formData.email}\n` +
-        `Phone: ${formData.phone || 'Not provided'}\n` +
-        `Interest: ${formData.interest}\n\n` +
-        `Message:\n${formData.message}`
-      )}`;
-
-    window.location.href = mailtoLink;
-
-    showFormStatus('Opening your email client...', 'success');
-    setTimeout(() => {
-      contactForm.reset();
-      formStatus.style.display = 'none';
-    }, 2000);
-  });
-
-  function showFormStatus(message, type) {
-    if (formStatus) {
-      formStatus.textContent = message;
-      formStatus.className = 'form-status ' + type;
-      formStatus.style.display = 'block';
+  const contactForm = document.getElementById('contactForm');
+  const formStatus = document.getElementById('formStatus');
+  if (contactForm) {
+    contactForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      // Get form values
+      const formData = {
+        name: document.getElementById('name').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        interest: document.getElementById('interest').value,
+        message: document.getElementById('message').value.trim()
+      };
+      // Validation
+      if (!formData.name || !formData.email || !formData.interest || !formData.message) {
+        showFormStatus('Please fill in all required fields.', 'error');
+        return;
+      }
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        showFormStatus('Please enter a valid email address.', 'error');
+        return;
+      }
+      // Build mailto link with all fields
+      const mailtoLink =
+        `mailto:info@romanzuzuk.com?subject=Contact from ${encodeURIComponent(formData.name)} - ${encodeURIComponent(formData.interest)}` +
+        `&body=${encodeURIComponent(
+          `Name: ${formData.name}\n` +
+          `Email: ${formData.email}\n` +
+          `Phone: ${formData.phone || 'Not provided'}\n` +
+          `Interest: ${formData.interest}\n\n` +
+          `Message:\n${formData.message}`
+        )}`;
+      window.location.href = mailtoLink;
+      showFormStatus('Opening your email client...', 'success');
+      setTimeout(() => {
+        contactForm.reset();
+        formStatus.style.display = 'none';
+      }, 2000);
+    });
+    function showFormStatus(message, type) {
+      if (formStatus) {
+        formStatus.textContent = message;
+        formStatus.className = 'form-status ' + type;
+        formStatus.style.display = 'block';
+      }
     }
   }
-}
-
 
   // ========== ANIMATION ON SCROLL ==========
   const animateOnScroll = () => {
     const elements = document.querySelectorAll('.gallery-item, .timeline-item');
-
     elements.forEach((el) => {
       const rect = el.getBoundingClientRect();
       if (rect.top < window.innerHeight && rect.bottom > 0) {
@@ -110,7 +97,6 @@ if (contactForm) {
       }
     });
   };
-
   window.addEventListener('scroll', animateOnScroll);
   animateOnScroll();
 
@@ -125,6 +111,40 @@ if (contactForm) {
       }
     });
   }
+
+  // ========== PURCHASE INQUIRY BUTTONS ==========
+  // Attach direct click handlers to each .btn-purchase BEFORE gallery-item handlers
+  // so stopPropagation prevents the gallery modal from opening.
+  document.querySelectorAll('.btn-purchase').forEach((purchaseBtn) => {
+    purchaseBtn.addEventListener('click', (e) => {
+      // Stop the click from bubbling up to the .gallery-item modal handler
+      e.stopPropagation();
+      e.preventDefault();
+
+      const artworkName = purchaseBtn.dataset.artwork || 'Selected Artwork';
+
+      // Scroll to contact section smoothly
+      const contactSection = document.getElementById('contact');
+      if (contactSection) {
+        contactSection.scrollIntoView({ behavior: 'smooth' });
+      }
+
+      // Wait for scroll, then prefill form
+      setTimeout(() => {
+        // Set interest to "Purchasing Available Work"
+        const interestSelect = document.getElementById('interest');
+        if (interestSelect) {
+          interestSelect.value = 'purchase';
+        }
+        // Prefill message with artwork name
+        const messageField = document.getElementById('message');
+        if (messageField) {
+          messageField.value = `I am interested in purchasing "${artworkName}". Please provide information about pricing and availability.`;
+          messageField.focus();
+        }
+      }, 800); // Delay to allow smooth scroll to complete
+    });
+  });
 
   // ========== GALLERY MODAL FUNCTIONALITY ==========
   const galleryItems = document.querySelectorAll('.gallery-item');
@@ -154,7 +174,6 @@ if (contactForm) {
   // Build artworks array and attach click handlers
   galleryItems.forEach((item, index) => {
     const img = item.querySelector('.gallery-image img');
-
     artworks.push({
       title: item.querySelector('h3')?.textContent || '',
       medium: item.querySelector('.gallery-meta span:first-child')?.textContent || '',
@@ -162,29 +181,25 @@ if (contactForm) {
       description: item.querySelector('.gallery-content p')?.textContent || '',
       src: img ? img.src : ''
     });
-
-  item.addEventListener('click', (event) => {
-        // CRITICAL: Check if purchase button was clicked FIRST - prevent modal opening
-    if (event.target.closest('.btn-purchase')) { event.stopPropagation(); event.preventDefault(); return; }
-        if (!img || !artworks[index].src) return;
-    currentIndex = index;
-    openModal();
+    item.addEventListener('click', (event) => {
+      // Do not open modal if a purchase button was clicked
+      if (event.target.closest('.btn-purchase')) return;
+      if (!img || !artworks[index].src) return;
+      currentIndex = index;
+      openModal();
     });
   });
 
   function openModal() {
     const artwork = artworks[currentIndex];
     if (!artwork || !artwork.src) return;
-
     // Reset zoom state whenever a new image opens
     if (modalImage.classList.contains('zoomed')) {
       modalImage.classList.remove('zoomed');
     }
-
     // Update image
     modalImage.src = artwork.src;
     modalImage.alt = artwork.title || '';
-
     // Update info
     modalInfo.innerHTML = `
       <h2>${artwork.title}</h2>
@@ -193,10 +208,8 @@ if (contactForm) {
       </div>
       <p>${artwork.description}</p>
     `;
-
     // Update counter
     modalCounter.textContent = `${currentIndex + 1} / ${artworks.length}`;
-
     modal.classList.add('active'); // make sure .active shows the modal in CSS
   }
 
@@ -220,7 +233,6 @@ if (contactForm) {
       openModal();
     });
   }
-
   if (nextBtn) {
     nextBtn.addEventListener('click', () => {
       currentIndex = (currentIndex + 1) % artworks.length;
@@ -238,17 +250,14 @@ if (contactForm) {
   // Keyboard navigation
   document.addEventListener('keydown', (e) => {
     if (!modal.classList.contains('active')) return;
-
     if (e.key === 'ArrowLeft') {
       currentIndex = (currentIndex - 1 + artworks.length) % artworks.length;
       openModal();
     }
-
     if (e.key === 'ArrowRight') {
       currentIndex = (currentIndex + 1) % artworks.length;
       openModal();
     }
-
     if (e.key === 'Escape') {
       closeGalleryModal();
     }
@@ -260,51 +269,9 @@ if (contactForm) {
       e.stopPropagation();
       modalImage.classList.toggle('zoomed');
     });
-
     modalImage.addEventListener('click', () => {
       modalImage.classList.toggle('zoomed');
     });
   }
-})
-  
-    // ========== PURCHASE INQUIRY BUTTONS ==========
-  // Event delegation for scalability - handles hundreds of artworks efficiently
-  const galleryGrid = document.querySelector('.gallery-grid');
-  
-  if (galleryGrid) {
-    galleryGrid.addEventListener('click', (e) => {
-      // Check if clicked element is purchase button or its child
-      const purchaseBtn = e.target.closest('.btn-purchase');
-      
-      if (purchaseBtn) {
-        // CRITICAL: Prevent event bubbling to gallery-item click handler
-        e.stopPropagation();
-        e.preventDefault();
-        
-        // Get artwork name from data attribute
-        const artworkName = purchaseBtn.dataset.artwork || 'Selected Artwork';
-        
-        // Scroll to contact section smoothly
-        const contactSection = document.getElementById('contact');
-        if (contactSection) {
-          contactSection.scrollIntoView({ behavior: 'smooth' });
-        }
-        
-        // Wait for scroll, then prefill form
-        setTimeout(() => {
-          // Set interest to "Purchasing Available Work"
-          const interestSelect = document.getElementById('interest');
-          if (interestSelect) {
-            interestSelect.value = 'purchase';
-          }
-          
-          // Prefill message with artwork name
-          const messageField = document.getElementById('message');
-          if (messageField) {
-            messageField.value = `I am interested in purchasing "${artworkName}". Please provide information about pricing and availability.`;
-            messageField.focus();
-          }
-        }, 800); // Delay to allow smooth scroll to complete
-      }
-    });
-  }; // end DOMContentLoaded
+
+}); // end DOMContentLoaded
