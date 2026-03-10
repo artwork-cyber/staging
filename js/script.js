@@ -1,5 +1,6 @@
 // ========== RUN AFTER DOM IS READY ==========
 document.addEventListener('DOMContentLoaded', () => {
+
   // ========== INTERSECTION OBSERVER FOR NAV HIGHLIGHTING ==========
   const sections = document.querySelectorAll('section[id]');
   const navLinks = document.querySelectorAll('.nav-link');
@@ -18,19 +19,23 @@ document.addEventListener('DOMContentLoaded', () => {
   }, observerOptions);
   sections.forEach((section) => observer.observe(section));
 
-  // ========== SMOOTH SCROLL BEHAVIOR ==========
+  // ========== SMOOTH SCROLL HELPER ==========
+  function scrollToSection(id) {
+    const target = document.getElementById(id);
+    if (!target) return;
+    const headerHeight = document.querySelector('header')?.offsetHeight || 70;
+    const top = target.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+    window.scrollTo({ top, behavior: 'smooth' });
+  }
+
+  // ========== SMOOTH SCROLL BEHAVIOR (nav links) ==========
   document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
     anchor.addEventListener('click', function (e) {
       const href = this.getAttribute('href');
       if (href !== '#') {
         e.preventDefault();
-        const target = document.querySelector(href);
-        if (target) {
-          target.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-          });
-        }
+        const id = href.slice(1);
+        scrollToSection(id);
       }
     });
   });
@@ -41,7 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (contactForm) {
     contactForm.addEventListener('submit', function (e) {
       e.preventDefault();
-      // Get form values
       const formData = {
         name: document.getElementById('name').value.trim(),
         email: document.getElementById('email').value.trim(),
@@ -49,18 +53,15 @@ document.addEventListener('DOMContentLoaded', () => {
         interest: document.getElementById('interest').value,
         message: document.getElementById('message').value.trim()
       };
-      // Validation
       if (!formData.name || !formData.email || !formData.interest || !formData.message) {
         showFormStatus('Please fill in all required fields.', 'error');
         return;
       }
-      // Email validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.email)) {
         showFormStatus('Please enter a valid email address.', 'error');
         return;
       }
-      // Build mailto link with all fields
       const mailtoLink =
         `mailto:info@romanzuzuk.com?subject=Contact from ${encodeURIComponent(formData.name)} - ${encodeURIComponent(formData.interest)}` +
         `&body=${encodeURIComponent(
@@ -104,45 +105,118 @@ document.addEventListener('DOMContentLoaded', () => {
   const header = document.querySelector('header');
   if (header) {
     window.addEventListener('scroll', () => {
-      if (window.scrollY > 0) {
-        header.style.boxShadow = '0 2px 15px rgba(0,0,0,0.15)';
-      } else {
-        header.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
-      }
+      header.style.boxShadow = window.scrollY > 0
+        ? '0 2px 15px rgba(0,0,0,0.15)'
+        : '0 2px 10px rgba(0,0,0,0.1)';
     });
   }
 
+  // ========== INQUIRY BADGE ON CONTACT NAV ==========
+  let inquiryCount = 0;
+  const contactNavLink = document.querySelector('.nav-link[href="#contact"]');
+  let inquiryBadge = null;
+
+  function updateInquiryBadge() {
+    if (!contactNavLink) return;
+    if (!inquiryBadge) {
+      inquiryBadge = document.createElement('span');
+      inquiryBadge.className = 'inquiry-badge';
+      contactNavLink.style.position = 'relative';
+      contactNavLink.appendChild(inquiryBadge);
+    }
+    inquiryBadge.textContent = inquiryCount;
+    inquiryBadge.classList.toggle('visible', inquiryCount > 0);
+  }
+
+  // ========== FLY-TO-CONTACT ANIMATION ==========
+  function flyToContact(btn, artworkTitle) {
+    const img = btn.closest('.gallery-item')?.querySelector('.gallery-image img');
+    const targetLink = document.querySelector('.nav-link[href="#contact"]');
+    if (!img || !targetLink) return;
+
+    // Create flying element
+    const flyEl = document.createElement('div');
+    flyEl.className = 'fly-item';
+    const cloneImg = document.createElement('img');
+    cloneImg.src = img.src;
+    flyEl.appendChild(cloneImg);
+    document.body.appendChild(flyEl);
+
+    // Start position: center of the clicked button
+    const btnRect = btn.getBoundingClientRect();
+    const targetRect = targetLink.getBoundingClientRect();
+
+    flyEl.style.left = (btnRect.left + btnRect.width / 2 - 30) + 'px';
+    flyEl.style.top = (btnRect.top + window.pageYOffset - 30) + 'px';
+
+    // Force reflow
+    flyEl.getBoundingClientRect();
+
+    // Animate to target (Contact nav link)
+    flyEl.style.transition = 'all 0.75s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+    flyEl.style.left = (targetRect.left + targetRect.width / 2 - 12) + 'px';
+    flyEl.style.top = (targetRect.top + window.pageYOffset - 12) + 'px';
+    flyEl.style.width = '24px';
+    flyEl.style.height = '24px';
+    flyEl.style.opacity = '0.2';
+
+    flyEl.addEventListener('transitionend', () => {
+      flyEl.remove();
+      // Update badge
+      inquiryCount++;
+      updateInquiryBadge();
+      // Pulse the badge
+      if (inquiryBadge) {
+        inquiryBadge.classList.add('pulse');
+        setTimeout(() => inquiryBadge.classList.remove('pulse'), 400);
+      }
+    }, { once: true });
+  }
+
   // ========== PURCHASE INQUIRY BUTTONS ==========
-  // Attach direct click handlers to each .btn-purchase BEFORE gallery-item handlers
-  // so stopPropagation prevents the gallery modal from opening.
   document.querySelectorAll('.btn-purchase').forEach((purchaseBtn) => {
     purchaseBtn.addEventListener('click', (e) => {
-      // Stop the click from bubbling up to the .gallery-item modal handler
       e.stopPropagation();
       e.preventDefault();
 
       const artworkName = purchaseBtn.dataset.artwork || 'Selected Artwork';
 
-      // Scroll to contact section smoothly
-      const contactSection = document.getElementById('contact');
-      if (contactSection) {
-        contactSection.scrollIntoView({ behavior: 'smooth' });
-      }
+      // 1. Button state: loading -> added
+      const originalHTML = purchaseBtn.innerHTML;
+      purchaseBtn.innerHTML = '<span class="btn-icon">&#10003;</span><span class="btn-text">Added to Inquiry!</span>';
+      purchaseBtn.classList.add('btn-added');
+      purchaseBtn.disabled = true;
 
-      // Wait for scroll, then prefill form
+      // 2. Fly animation toward Contact nav
+      flyToContact(purchaseBtn, artworkName);
+
+      // 3. Scroll to contact form after animation
       setTimeout(() => {
-        // Set interest to "Purchasing Available Work"
+        scrollToSection('contact');
+      }, 700);
+
+      // 4. Pre-fill the form after scroll settles
+      setTimeout(() => {
         const interestSelect = document.getElementById('interest');
-        if (interestSelect) {
-          interestSelect.value = 'purchase';
-        }
-        // Prefill message with artwork name
+        if (interestSelect) interestSelect.value = 'purchase';
         const messageField = document.getElementById('message');
         if (messageField) {
           messageField.value = `I am interested in purchasing "${artworkName}". Please provide information about pricing and availability.`;
-          messageField.focus();
+          // Highlight the form briefly
+          messageField.classList.add('form-highlight');
+          setTimeout(() => messageField.classList.remove('form-highlight'), 1500);
         }
-      }, 800); // Delay to allow smooth scroll to complete
+        // Focus the name field if empty
+        const nameField = document.getElementById('name');
+        if (nameField && !nameField.value) nameField.focus();
+      }, 1500);
+
+      // 5. Reset button after delay
+      setTimeout(() => {
+        purchaseBtn.innerHTML = originalHTML;
+        purchaseBtn.classList.remove('btn-added');
+        purchaseBtn.disabled = false;
+      }, 3500);
     });
   });
 
@@ -152,26 +226,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeModal = document.getElementById('closeModal');
   const prevBtn = document.getElementById('prevBtn');
   const nextBtn = document.getElementById('nextBtn');
-  const modalImage = document.getElementById('modalImage'); // <img>
+  const modalImage = document.getElementById('modalImage');
   const modalInfo = document.getElementById('modalInfo');
   const modalCounter = document.getElementById('modalCounter');
   const modalZoomBtn = document.getElementById('modalZoomBtn');
 
-  // If modal markup is missing, skip setup
-  if (
-    !galleryItems.length ||
-    !modal ||
-    !modalImage ||
-    !modalInfo ||
-    !modalCounter
-  ) {
-    return;
-  }
+  if (!galleryItems.length || !modal || !modalImage || !modalInfo || !modalCounter) return;
 
   let currentIndex = 0;
   const artworks = [];
 
-  // Build artworks array and attach click handlers
   galleryItems.forEach((item, index) => {
     const img = item.querySelector('.gallery-image img');
     artworks.push({
@@ -182,7 +246,6 @@ document.addEventListener('DOMContentLoaded', () => {
       src: img ? img.src : ''
     });
     item.addEventListener('click', (event) => {
-      // Do not open modal if a purchase button was clicked
       if (event.target.closest('.btn-purchase')) return;
       if (!img || !artworks[index].src) return;
       currentIndex = index;
@@ -193,85 +256,39 @@ document.addEventListener('DOMContentLoaded', () => {
   function openModal() {
     const artwork = artworks[currentIndex];
     if (!artwork || !artwork.src) return;
-    // Reset zoom state whenever a new image opens
-    if (modalImage.classList.contains('zoomed')) {
-      modalImage.classList.remove('zoomed');
-    }
-    // Update image
+    if (modalImage.classList.contains('zoomed')) modalImage.classList.remove('zoomed');
     modalImage.src = artwork.src;
     modalImage.alt = artwork.title || '';
-    // Update info
     modalInfo.innerHTML = `
       <h2>${artwork.title}</h2>
-      <div class="modal-meta">
-        <span>${artwork.medium} • ${artwork.size}</span>
-      </div>
+      <div class="modal-meta"><span>${artwork.medium} • ${artwork.size}</span></div>
       <p>${artwork.description}</p>
     `;
-    // Update counter
     modalCounter.textContent = `${currentIndex + 1} / ${artworks.length}`;
-    modal.classList.add('active'); // make sure .active shows the modal in CSS
+    modal.classList.add('active');
   }
 
   function closeGalleryModal() {
     modal.classList.remove('active');
-    // Optionally reset zoom when closing
-    if (modalImage.classList.contains('zoomed')) {
-      modalImage.classList.remove('zoomed');
-    }
+    if (modalImage.classList.contains('zoomed')) modalImage.classList.remove('zoomed');
   }
 
-  // Close button
-  if (closeModal) {
-    closeModal.addEventListener('click', closeGalleryModal);
-  }
+  if (closeModal) closeModal.addEventListener('click', closeGalleryModal);
+  if (prevBtn) prevBtn.addEventListener('click', () => { currentIndex = (currentIndex - 1 + artworks.length) % artworks.length; openModal(); });
+  if (nextBtn) nextBtn.addEventListener('click', () => { currentIndex = (currentIndex + 1) % artworks.length; openModal(); });
 
-  // Navigation buttons
-  if (prevBtn) {
-    prevBtn.addEventListener('click', () => {
-      currentIndex = (currentIndex - 1 + artworks.length) % artworks.length;
-      openModal();
-    });
-  }
-  if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
-      currentIndex = (currentIndex + 1) % artworks.length;
-      openModal();
-    });
-  }
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeGalleryModal(); });
 
-  // Close modal on background click
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      closeGalleryModal();
-    }
-  });
-
-  // Keyboard navigation
   document.addEventListener('keydown', (e) => {
     if (!modal.classList.contains('active')) return;
-    if (e.key === 'ArrowLeft') {
-      currentIndex = (currentIndex - 1 + artworks.length) % artworks.length;
-      openModal();
-    }
-    if (e.key === 'ArrowRight') {
-      currentIndex = (currentIndex + 1) % artworks.length;
-      openModal();
-    }
-    if (e.key === 'Escape') {
-      closeGalleryModal();
-    }
+    if (e.key === 'ArrowLeft') { currentIndex = (currentIndex - 1 + artworks.length) % artworks.length; openModal(); }
+    if (e.key === 'ArrowRight') { currentIndex = (currentIndex + 1) % artworks.length; openModal(); }
+    if (e.key === 'Escape') closeGalleryModal();
   });
 
-  // ========== MODAL IMAGE ZOOM TOGGLE ==========
   if (modalZoomBtn && modalImage) {
-    modalZoomBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      modalImage.classList.toggle('zoomed');
-    });
-    modalImage.addEventListener('click', () => {
-      modalImage.classList.toggle('zoomed');
-    });
+    modalZoomBtn.addEventListener('click', (e) => { e.stopPropagation(); modalImage.classList.toggle('zoomed'); });
+    modalImage.addEventListener('click', () => { modalImage.classList.toggle('zoomed'); });
   }
 
 }); // end DOMContentLoaded
