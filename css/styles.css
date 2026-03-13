@@ -643,6 +643,105 @@ nav a.active::after {
   color: #ff6b35;
 }
 
+
+/* COMPACT EMAIL INFO CARD */
+.info-card--compact {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.info-card--compact .info-icon {
+    font-size: 1.4rem;
+    margin-bottom: 0;
+    flex-shrink: 0;
+}
+
+.info-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.info-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #999;
+}
+
+/* PURCHASE INFO SECTION */
+.purchase-info {
+    background: #fff;
+    border-radius: 12px;
+    padding: 28px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    border-left: 4px solid #ff6b35;
+}
+
+.purchase-info h3 {
+    font-size: 1.2rem;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.purchase-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.purchase-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.step-number {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #ff6b35;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.step-text strong {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 3px;
+}
+
+.step-text p {
+    font-size: 0.85rem;
+    color: #666;
+    line-height: 1.45;
+    margin: 0;
+}
+
+.purchase-note {
+    font-size: 0.82rem;
+    color: #555;
+    background: #f9f5f0;
+    border-radius: 8px;
+    padding: 12px 14px;
+    line-height: 1.5;
+    margin: 0;
+}
+
 .social-links {
   background: linear-gradient(135deg, #2c3e50, #34495e);
   padding: 30px;
